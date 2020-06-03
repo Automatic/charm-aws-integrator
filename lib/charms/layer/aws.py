@@ -846,6 +846,15 @@ def _ensure_policy(policy_name):
         log('Loaded IAM policy: {}', policy_name)
     except AlreadyExistsAWSError:
         log('Policy already exists: {} ({})', policy_name, policy_file)
+    except AWSError as e:
+        if e.error_type != 'AccessDenied':
+            raise
+        # check for whether the policy already exists
+        if _policy_needs_update(_get_policy_arn(policy_name)):
+            # not with the contents we want
+            raise
+        # existing policy is what we want
+        log('Existing IAM policy: {}', policy_name)
 
 
 def _policy_needs_update(policy_arn):
