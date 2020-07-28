@@ -98,6 +98,15 @@ def get_credentials():
     return False
 
 
+def get_permissions_boundary():
+    config = hookenv.config()
+    policy_name = config.get('permissions-boundary-policy')
+    if not policy_name.startswith('arn:'):
+        account_id = _get_account_id()
+        policy_name = 'arn:aws:iam::{}:policy/{}'.format(account_id, policy_name)
+    return ['--permissions-boundary', policy_name] if policy_name else []
+
+
 def update_credentials_file(access_key, secret_key):
     """
     Write the credentials to the config file for the aws-cli tool.
@@ -924,10 +933,12 @@ def _ensure_role(application_name, role_name):
     """
     role_file = Path('files/role.json')
     role_file_url = 'file://{}'.format(role_file.absolute())
+    permissions_boundary = get_permissions_boundary()
     try:
         _aws('iam', 'create-role',
              '--role-name', role_name,
-             '--assume-role-policy-document', role_file_url)
+             '--assume-role-policy-document', role_file_url,
+             *permissions_boundary)
         log('Created IAM role: {}', role_name)
     except AlreadyExistsAWSError:
         pass

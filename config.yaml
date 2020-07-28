@@ -26,6 +26,16 @@ options:
       It is strongly recommended that you use 'juju trust' instead, if available.
     type: string
     default: ""
+  permissions-boundary-policy:
+    description: |
+      The name of an IAM policy to use as roles' permissions boundary.
+
+      A policy that allows this charm to create a role, for use
+      through an instance profile, may require the role include a
+      policy as permissions boundary. Configure a policy name here to
+      be passed via the create-role --permissions-boundary option.
+    type: string
+    default: ""
   rds-mysql-instance-class:
     description: Instance class to use for RDS MySQL databases.
     type: string
